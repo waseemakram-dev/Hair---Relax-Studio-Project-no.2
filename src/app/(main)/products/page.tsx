@@ -39,7 +39,7 @@ export default function ProductsPage() {
   
   const columns = getColumns({ onEdit: handleEdit, onDelete: handleDelete })
 
-  const handleSubmit = (values: { name: string; price: number, stock: number }) => {
+  const handleSubmit = (values: { name: string; price: number, stock: number, lowStockThreshold?: number }) => {
     if (editingProduct) {
       updateProduct({ ...editingProduct, ...values })
       toast({ title: "Product Updated" })

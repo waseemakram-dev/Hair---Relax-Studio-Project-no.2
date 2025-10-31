@@ -24,7 +24,10 @@ const formSchema = z.object({
   }),
   stock: z.coerce.number().int().min(0, {
       message: "Stock must be a positive integer."
-  })
+  }),
+  lowStockThreshold: z.coerce.number().int().min(0, {
+    message: "Low stock threshold must be a positive integer."
+  }).optional()
 })
 
 interface ProductFormProps {
@@ -39,6 +42,7 @@ export function ProductForm({ onSubmit, product }: ProductFormProps) {
       name: product?.name || "",
       price: product?.price || 0,
       stock: product?.stock || 0,
+      lowStockThreshold: product?.lowStockThreshold || 10,
     },
   })
 
@@ -86,6 +90,19 @@ export function ProductForm({ onSubmit, product }: ProductFormProps) {
             )}
             />
         </div>
+        <FormField
+          control={form.control}
+          name="lowStockThreshold"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Low Stock Threshold</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="e.g., 10" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type="submit">{product ? 'Update' : 'Create'} Product</Button>
       </form>
     </Form>

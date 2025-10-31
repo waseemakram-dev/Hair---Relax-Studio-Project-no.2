@@ -18,7 +18,7 @@ export default function DashboardPage() {
     )
   }
 
-  const lowStockCount = products.filter(p => p.stock < 10).length
+  const lowStockCount = products.filter(p => p.stock < (p.lowStockThreshold ?? 10)).length
   const todaysSales = getTodaysSales()
   const todaysCustomers = getTodaysCustomers()
 
@@ -45,7 +45,7 @@ export default function DashboardPage() {
           title="Low Stock Items"
           value={lowStockCount}
           icon={Package}
-          description="Products with stock less than 10."
+          description="Products with stock less than threshold."
         />
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-5">

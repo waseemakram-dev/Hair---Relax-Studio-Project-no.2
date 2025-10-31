@@ -32,6 +32,10 @@
         "stock": {
           "type": "number",
           "description": "The stock quantity of the product."
+        },
+        "lowStockThreshold": {
+          "type": "number",
+          "description": "The threshold below which stock is considered low."
         }
       },
       "required": ["name", "price", "stock"]

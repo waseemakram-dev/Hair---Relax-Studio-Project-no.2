@@ -27,8 +27,10 @@ export const getColumns = ({ onEdit, onDelete }: ProductsColumnsProps): ColumnDe
     accessorKey: "stock",
     header: "Stock",
     cell: ({ row }) => {
-        const stock = parseInt(row.getValue("stock"))
-        return <Badge variant={stock < 10 ? "destructive" : "secondary"}>{stock} in stock</Badge>
+        const product = row.original
+        const stock = product.stock
+        const lowStockThreshold = product.lowStockThreshold ?? 10
+        return <Badge variant={stock < lowStockThreshold ? "destructive" : "secondary"}>{stock} in stock</Badge>
     }
   },
   {

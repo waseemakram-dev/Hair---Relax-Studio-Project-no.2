@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,8 +64,7 @@ export default function SignUpPage() {
   return (
     <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tighter text-destructive">HAIR & RELAX</h1>
-            <p className="text-xl font-semibold tracking-wider text-destructive/80">STUDIO</p>
+            <Image src="/logo.png" alt="HAIR & RELAX STUDIO" width={200} height={100} className="mx-auto" />
         </div>
 
         <div className="bg-card p-8 rounded-lg shadow-md">

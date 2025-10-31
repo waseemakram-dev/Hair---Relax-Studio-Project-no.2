@@ -23,6 +23,7 @@ import {
 import { Button } from "./ui/button"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { useAuth } from "@/firebase"
 import { signOut } from "firebase/auth"
 
@@ -49,8 +50,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="text-center py-4">
-          <h1 className="text-2xl font-bold tracking-tighter text-destructive">HAIR & RELAX</h1>
-          <p className="text-lg font-semibold tracking-wider text-destructive/80">STUDIO</p>
+          <Image src="/logo.png" alt="HAIR & RELAX STUDIO" width={150} height={75} className="mx-auto" />
         </div>
       </SidebarHeader>
       <SidebarContent>

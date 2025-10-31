@@ -49,7 +49,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="py-6">
+        <div className="py-6 border-b border-sidebar-border">
           <Logo className="w-48 h-auto mx-auto" />
         </div>
       </SidebarHeader>
@@ -72,7 +72,7 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-4 space-y-2">
+      <SidebarFooter className="p-4 space-y-2 border-t border-sidebar-border">
         <Button asChild className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 text-base h-12">
             <Link href="/receipts/new">
                 <PlusCircle className="h-5 w-5" />

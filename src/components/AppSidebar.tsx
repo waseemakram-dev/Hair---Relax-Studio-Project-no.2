@@ -2,7 +2,7 @@
 
 import {
   LayoutDashboard,
-  Warehouse,
+  Package,
   Scissors,
   Users,
   Receipt,
@@ -31,7 +31,7 @@ const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/receipts", label: "Receipts", icon: Receipt },
   { href: "/services", label: "Services", icon: Scissors },
-  { href: "/products", label: "Inventory", icon: Warehouse },
+  { href: "/products", label: "Inventory", icon: Package },
   { href: "/workers", label: "Workers", icon: Users },
   { href: "/reports", label: "Sales Report", icon: BarChart },
 ]
@@ -61,7 +61,7 @@ export function AppSidebar() {
                 asChild
                 isActive={pathname.startsWith(item.href)}
                 tooltip={item.label}
-                className="data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground font-medium text-base h-12"
+                className="data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground font-medium text-base h-12 text-muted-foreground hover:text-foreground data-[active=true]:hover:text-sidebar-accent-foreground"
               >
                 <Link href={item.href}>
                   <item.icon className="h-5 w-5" />
@@ -81,13 +81,13 @@ export function AppSidebar() {
         </Button>
         <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton className="font-medium text-base h-12">
+                <SidebarMenuButton className="font-medium text-base h-12 text-muted-foreground hover:text-foreground">
                     <Settings className="h-5 w-5" />
                     <span>Settings</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut} className="font-medium text-base h-12">
+                <SidebarMenuButton onClick={handleSignOut} className="font-medium text-base h-12 text-muted-foreground hover:text-foreground">
                     <LogOut className="h-5 w-5" />
                     <span>Logout</span>
                 </SidebarMenuButton>

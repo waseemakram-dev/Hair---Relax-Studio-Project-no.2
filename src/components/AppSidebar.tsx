@@ -3,13 +3,14 @@
 import {
   LayoutDashboard,
   Package,
-  Scissors,
   Users,
   Receipt,
   BarChart,
   Settings,
   PlusCircle,
-  LogOut
+  LogOut,
+  Award,
+  Scissors
 } from "lucide-react"
 import {
   Sidebar,
@@ -29,11 +30,12 @@ import { Logo } from "./Logo"
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/receipts", label: "Receipts", icon: Receipt },
-  { href: "/services", label: "Services", icon: Scissors },
   { href: "/products", label: "Inventory", icon: Package },
   { href: "/workers", label: "Workers", icon: Users },
+  { href: "/top-worker", label: "Top Worker", icon: Award },
+  { href: "/receipts", label: "Receipts", icon: Receipt },
   { href: "/reports", label: "Sales Report", icon: BarChart },
+  { href: "/services", label: "Services", icon: Scissors },
 ]
 
 export function AppSidebar() {

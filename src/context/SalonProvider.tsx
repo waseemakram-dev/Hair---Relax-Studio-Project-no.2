@@ -31,6 +31,9 @@ interface SalonContextType {
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
+  addWorker: (worker: Omit<Worker, 'id'>) => Promise<void>;
+  updateWorker: (worker: Worker) => Promise<void>;
+  archiveWorker: (id: string) => Promise<void>;
   addReceipt: (receipt: Omit<Receipt, 'id' | 'createdAt' | 'total'>) => Promise<Receipt>;
   getReceiptById: (id: string) => Receipt | undefined;
   getTodaysSales: () => number;
@@ -86,6 +89,23 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     if (!productsCollection) return;
     await deleteDoc(doc(productsCollection, id));
   };
+
+  const addWorker = async (worker: Omit<Worker, 'id'>) => {
+    if (!workersCollection) return;
+    await addDoc(workersCollection, worker);
+  };
+
+  const updateWorker = async (updatedWorker: Worker) => {
+    if (!workersCollection) return;
+    const { id, ...data } = updatedWorker;
+    await updateDoc(doc(workersCollection, id), data);
+  };
+
+  const archiveWorker = async (id: string) => {
+    if (!workersCollection) return;
+    await updateDoc(doc(workersCollection, id), { archived: true });
+  };
+
 
   const addReceipt = async (receiptData: Omit<Receipt, 'id' | 'createdAt' | 'total'>): Promise<Receipt> => {
     if (!receiptsCollection || !workersCollection || !productsCollection) {
@@ -165,6 +185,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     services, products, workers, receipts, loading,
     addService, updateService, deleteService,
     addProduct, updateProduct, deleteProduct,
+    addWorker, updateWorker, archiveWorker,
     addReceipt, getReceiptById,
     getTodaysSales, getTodaysCustomers
   };

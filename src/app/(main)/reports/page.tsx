@@ -15,14 +15,17 @@ import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
 export default function ReportsPage() {
-  const { workers, receipts } = useSalon()
+  const { workers } = useSalon()
 
-  const totalSales = workers.reduce((sum, worker) => sum + worker.sales, 0)
-  const totalCustomers = workers.reduce((sum, worker) => sum + worker.customers, 0)
+  const activeWorkers = workers.filter(w => !w.archived)
+  const archivedWorkers = workers.filter(w => w.archived)
+
+  const totalSales = activeWorkers.reduce((sum, worker) => sum + worker.sales, 0)
+  const totalCustomers = activeWorkers.reduce((sum, worker) => sum + worker.customers, 0)
 
   const downloadReport = () => {
     let csvContent = "data:text/csv;charset=utf-8,Portion/Worker,Total Sales,Total Customers\n"
-    workers.forEach(worker => {
+    activeWorkers.forEach(worker => {
         csvContent += `${worker.name},${worker.sales.toFixed(2)},${worker.customers}\n`
     })
     const encodedUri = encodeURI(csvContent)
@@ -62,7 +65,7 @@ export default function ReportsPage() {
       </div>
       <Card className="mt-6">
         <CardHeader>
-            <CardTitle>Worker Breakdown</CardTitle>
+            <CardTitle>Active Worker Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
             <Table>
@@ -74,7 +77,7 @@ export default function ReportsPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {workers.map(worker => (
+                    {activeWorkers.map(worker => (
                         <TableRow key={worker.id}>
                             <TableCell className="font-medium">{worker.name}</TableCell>
                             <TableCell>{worker.customers}</TableCell>
@@ -85,6 +88,34 @@ export default function ReportsPage() {
             </Table>
         </CardContent>
       </Card>
+
+      {archivedWorkers.length > 0 && (
+        <Card className="mt-6">
+            <CardHeader>
+                <CardTitle>Archived Worker Report</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Portion / Worker</TableHead>
+                            <TableHead>Customers Served</TableHead>
+                            <TableHead className="text-right">Total Sales</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {archivedWorkers.map(worker => (
+                            <TableRow key={worker.id}>
+                                <TableCell className="font-medium">{worker.name}</TableCell>
+                                <TableCell>{worker.customers}</TableCell>
+                                <TableCell className="text-right">Rs {worker.sales.toFixed(2)}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+      )}
     </>
   )
 }

@@ -19,6 +19,7 @@ export interface Worker {
   name: string;
   customers: number;
   sales: number;
+  archived?: boolean;
 }
 
 export interface Receipt {

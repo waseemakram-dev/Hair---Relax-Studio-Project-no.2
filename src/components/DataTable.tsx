@@ -6,7 +6,9 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getFilteredRowModel,
   useReactTable,
+  type ColumnFiltersState
 } from "@tanstack/react-table"
 import {
   Table,
@@ -17,27 +19,51 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   noResultsMessage?: string
+  filterColumn?: string
+  filterPlaceholder?: string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   noResultsMessage = "No results found.",
+  filterColumn,
+  filterPlaceholder,
 }: DataTableProps<TData, TValue>) {
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      columnFilters,
+    },
   })
 
   return (
     <div>
+        {filterColumn && (
+             <div className="flex items-center py-4">
+                <Input
+                placeholder={filterPlaceholder || `Filter by ${filterColumn}...`}
+                value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
+                onChange={(event) =>
+                    table.getColumn(filterColumn)?.setFilterValue(event.target.value)
+                }
+                className="max-w-sm"
+                />
+            </div>
+        )}
         <div className="rounded-md border">
         <Table>
             <TableHeader>

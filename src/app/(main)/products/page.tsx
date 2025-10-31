@@ -61,7 +61,7 @@ export default function ProductsPage() {
         }}
       >
         <PageHeader
-          title="Products"
+          title="Inventory"
           description="Manage your salon's product inventory."
         >
           <DialogTrigger asChild>

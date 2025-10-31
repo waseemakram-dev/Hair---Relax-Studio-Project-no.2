@@ -2,11 +2,14 @@
 
 import {
   LayoutDashboard,
-  ClipboardList,
+  Warehouse,
   Scissors,
-  ShoppingBag,
-  BarChartHorizontalBig,
-  Package,
+  Users,
+  Receipt,
+  BarChart,
+  Settings,
+  PlusCircle,
+  LogOut
 } from "lucide-react"
 import {
   Sidebar,
@@ -16,43 +19,52 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { usePathname } from "next/navigation"
+import { Button } from "./ui/button"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
+import { useAuth } from "@/firebase"
+import { signOut } from "firebase/auth"
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/receipts", label: "Receipts", icon: ClipboardList },
+  { href: "/products", label: "Inventory", icon: Warehouse },
   { href: "/services", label: "Services", icon: Scissors },
-  { href: "/products", label: "Products", icon: ShoppingBag },
-  { href: "/reports", label: "Reports", icon: BarChartHorizontalBig },
+  { href: "/workers", label: "Workers", icon: Users },
+  { href: "/receipts", label: "Receipts", icon: Receipt },
+  { href: "/reports", label: "Sales Report", icon: BarChart },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const auth = useAuth()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut(auth)
+    router.push('/login')
+  }
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Package className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-semibold">SalonFlow</span>
+        <div className="text-center py-4">
+          <h1 className="text-2xl font-bold tracking-tighter text-destructive">HAIR & RELAX</h1>
+          <p className="text-lg font-semibold tracking-wider text-destructive/80">STUDIO</p>
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
+        <SidebarMenu className="px-4">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
                 isActive={pathname.startsWith(item.href)}
                 tooltip={item.label}
+                className="data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground font-medium text-base h-12"
               >
                 <Link href={item.href}>
-                  <item.icon />
+                  <item.icon className="h-5 w-5" />
                   <span>{item.label}</span>
                 </Link>
               </SidebarMenuButton>
@@ -60,8 +72,27 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarTrigger />
+      <SidebarFooter className="p-4 space-y-2">
+        <Button asChild className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 text-base h-12">
+            <Link href="/receipts/new">
+                <PlusCircle className="h-5 w-5" />
+                <span>New Receipt</span>
+            </Link>
+        </Button>
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <SidebarMenuButton className="font-medium text-base h-12">
+                    <Settings className="h-5 w-5" />
+                    <span>Settings</span>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleSignOut} className="font-medium text-base h-12">
+                    <LogOut className="h-5 w-5" />
+                    <span>Logout</span>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   )

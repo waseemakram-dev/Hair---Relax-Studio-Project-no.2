@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect } from "react"
@@ -49,9 +50,10 @@ interface ReceiptFormProps {
   products: Product[]
   workers: Worker[]
   PrintableReceipt: React.ReactElement
+  isSubmitting: boolean
 }
 
-export function ReceiptForm({ onSubmit, services, products, workers, PrintableReceipt }: ReceiptFormProps) {
+export function ReceiptForm({ onSubmit, services, products, workers, PrintableReceipt, isSubmitting }: ReceiptFormProps) {
     const [isServiceDialogOpen, setServiceDialogOpen] = React.useState(false)
     const [isProductDialogOpen, setProductDialogOpen] = React.useState(false)
 
@@ -310,8 +312,12 @@ export function ReceiptForm({ onSubmit, services, products, workers, PrintableRe
             </CardContent>
         </Card>
 
-        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white !mt-8 text-lg py-6">
-            Print & Finalize Sale
+        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white !mt-8 text-lg py-6" disabled={isSubmitting}>
+             {isSubmitting ? (
+                <Loader2 className="animate-spin" />
+            ) : (
+                'Print & Finalize Sale'
+            )}
         </Button>
       </form>
     </Form>

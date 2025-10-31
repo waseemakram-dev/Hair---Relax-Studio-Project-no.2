@@ -23,9 +23,9 @@ import {
 import { Button } from "./ui/button"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
 import { useAuth } from "@/firebase"
 import { signOut } from "firebase/auth"
+import { Logo } from "./Logo"
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -50,7 +50,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="text-center py-4">
-          <Image src="/logo.png" alt="HAIR & RELAX STUDIO" width={150} height={75} className="mx-auto" />
+          <Logo className="w-36 h-auto mx-auto" />
         </div>
       </SidebarHeader>
       <SidebarContent>

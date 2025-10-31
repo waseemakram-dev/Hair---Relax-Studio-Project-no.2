@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
 const formSchema = z.object({
     email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -64,7 +64,7 @@ export default function SignUpPage() {
   return (
     <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-            <Image src="/logo.png" alt="HAIR & RELAX STUDIO" width={200} height={100} className="mx-auto" />
+            <Logo className="w-48 h-auto mx-auto" />
         </div>
 
         <div className="bg-card p-8 rounded-lg shadow-md">

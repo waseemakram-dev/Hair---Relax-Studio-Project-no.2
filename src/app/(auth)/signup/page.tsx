@@ -64,7 +64,7 @@ export default function SignUpPage() {
   return (
     <div className="w-full max-w-md">
         <div className="text-center mb-8">
-            <Logo className="w-64 h-auto mx-auto" />
+            <Logo className="inline-block" />
         </div>
 
         <div className="bg-card p-8 rounded-lg shadow-lg">

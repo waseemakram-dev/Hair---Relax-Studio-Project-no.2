@@ -44,8 +44,8 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="py-6 border-b border-sidebar-border">
-          <Logo className="w-48 h-auto mx-auto" />
+        <div className="py-6 border-b border-sidebar-border flex justify-center">
+          <Logo />
         </div>
       </SidebarHeader>
       <SidebarContent>

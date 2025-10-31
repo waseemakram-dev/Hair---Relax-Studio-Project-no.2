@@ -20,6 +20,13 @@ interface ReceiptsColumnsProps {
 }
 
 export const getColumns = ({ workers }: ReceiptsColumnsProps): ColumnDef<Receipt>[] => [
+    {
+    accessorKey: "id",
+    header: "Invoice #",
+    cell: ({ row }) => {
+        return <span>#{(row.getValue("id") as string).substring(0,6)}</span>
+    }
+  },
   {
     accessorKey: "customerName",
     header: "Customer",

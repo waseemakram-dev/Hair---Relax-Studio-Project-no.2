@@ -38,9 +38,14 @@ export default function ReceiptDetailsPage({ params }: { params: { id: string } 
     ? receipt.createdAt 
     : (receipt.createdAt as Timestamp).toDate();
 
+  const receiptForPrint = {
+    ...receipt,
+    createdAt: receiptDate
+  }
+
   return (
     <>
-      <PageHeader title={`Receipt #${receipt.id.substring(0, 7)}`} description={`Details for customer ${receipt.customerName}.`}>
+      <PageHeader title={`Receipt #${receipt.id.substring(0, 6)}`} description={`Details for customer ${receipt.customerName}.`}>
           <Button onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
               Print Receipt
@@ -48,7 +53,7 @@ export default function ReceiptDetailsPage({ params }: { params: { id: string } 
       </PageHeader>
       <Card>
         <CardContent className="p-0">
-          <PrintableReceipt ref={printRef} receipt={{...receipt, createdAt: receiptDate}} services={services} products={products} worker={worker} />
+          <PrintableReceipt ref={printRef} receipt={receiptForPrint} services={services} products={products} worker={worker} />
         </CardContent>
       </Card>
     </>

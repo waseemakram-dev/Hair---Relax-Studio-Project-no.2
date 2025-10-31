@@ -73,7 +73,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 space-y-2 border-t border-sidebar-border">
-        <Button asChild className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 text-base h-12">
+        <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-base h-12">
             <Link href="/receipts/new">
                 <PlusCircle className="h-5 w-5" />
                 <span>New Receipt</span>

@@ -3,7 +3,7 @@
 import React from 'react'
 import type { Receipt, Service, Product, Worker } from '@/lib/types'
 import { Separator } from '@/components/ui/separator'
-import { Logo } from '../Logo'
+import { ReceiptLogo } from './ReceiptLogo'
 
 interface PrintableReceiptProps {
   receipt?: Partial<Receipt>
@@ -31,9 +31,7 @@ export const PrintableReceipt = React.forwardRef<HTMLDivElement, PrintableReceip
       <div ref={ref} className="p-6 bg-white text-black print:p-0">
         <div className="max-w-md mx-auto print:max-w-none print:mx-0">
           <div className="text-center mb-6">
-            <Logo className="w-64 h-auto mx-auto" />
-            <p className="text-slate-500 text-xs mt-2">13/G Road, Gulshan-e-Batool Colony, Chishtian</p>
-            <p className="text-slate-500 text-xs">+923230284330</p>
+            <ReceiptLogo className="w-64 h-auto mx-auto" />
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
@@ -94,7 +92,7 @@ export const PrintableReceipt = React.forwardRef<HTMLDivElement, PrintableReceip
               { (receipt?.discount || 0) > 0 && (
                   <div className="flex justify-between">
                       <span>Discount ({receipt?.discount || 0}%)</span>
-                      <span className="text-green-600">-Rs {discountAmount.toFixed(2)}</span>
+                      <span>-Rs {discountAmount.toFixed(2)}</span>
                   </div>
               )}
                <Separator className="my-2"/>

@@ -8,7 +8,6 @@ import {
   BarChart,
   Settings,
   PlusCircle,
-  Award,
   Scissors
 } from "lucide-react"
 import {
@@ -30,11 +29,10 @@ import { Logo } from "./Logo"
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/products", label: "Inventory", icon: Package },
+  { href: "/services", label: "Services", icon: Scissors },
   { href: "/workers", label: "Workers", icon: Users },
-  { href: "/top-worker", label: "Top Worker", icon: Award },
   { href: "/receipts", label: "Receipts", icon: Receipt },
   { href: "/reports", label: "Sales Report", icon: BarChart },
-  { href: "/services", label: "Services", icon: Scissors },
 ]
 
 export function AppSidebar() {

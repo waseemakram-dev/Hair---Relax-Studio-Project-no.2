@@ -8,7 +8,6 @@ import {
   BarChart,
   Settings,
   PlusCircle,
-  LogOut,
   Award,
   Scissors
 } from "lucide-react"
@@ -86,12 +85,6 @@ export function AppSidebar() {
                 <SidebarMenuButton className="font-medium text-base h-12 text-muted-foreground hover:text-foreground">
                     <Settings className="h-5 w-5" />
                     <span>Settings</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut} className="font-medium text-base h-12 text-muted-foreground hover:text-foreground">
-                    <LogOut className="h-5 w-5" />
-                    <span>Logout</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>

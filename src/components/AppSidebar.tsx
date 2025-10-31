@@ -29,10 +29,10 @@ import { Logo } from "./Logo"
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/products", label: "Inventory", icon: Warehouse },
-  { href: "/services", label: "Services", icon: Scissors },
-  { href: "/workers", label: "Workers", icon: Users },
   { href: "/receipts", label: "Receipts", icon: Receipt },
+  { href: "/services", label: "Services", icon: Scissors },
+  { href: "/products", label: "Inventory", icon: Warehouse },
+  { href: "/workers", label: "Workers", icon: Users },
   { href: "/reports", label: "Sales Report", icon: BarChart },
 ]
 
@@ -49,8 +49,8 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="text-center py-4">
-          <Logo className="w-36 h-auto mx-auto" />
+        <div className="py-6">
+          <Logo className="w-48 h-auto mx-auto" />
         </div>
       </SidebarHeader>
       <SidebarContent>

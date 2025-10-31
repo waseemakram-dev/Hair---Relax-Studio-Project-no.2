@@ -62,14 +62,14 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="w-full max-w-sm">
+    <div className="w-full max-w-md">
         <div className="text-center mb-8">
-            <Logo className="w-48 h-auto mx-auto" />
+            <Logo className="w-64 h-auto mx-auto" />
         </div>
 
-        <div className="bg-card p-8 rounded-lg shadow-md">
+        <div className="bg-card p-8 rounded-lg shadow-lg">
             <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold">Create an Account</h2>
+                <h2 className="text-2xl font-bold tracking-tight">Create an Account</h2>
                 <p className="text-muted-foreground">
                     Get started with your salon dashboard.
                 </p>
@@ -102,7 +102,7 @@ export default function SignUpPage() {
                     </FormItem>
                 )}
                 />
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full !mt-8" disabled={loading}>
                 {loading ? (
                     <Loader2 className="animate-spin" />
                 ) : (

@@ -8,26 +8,34 @@ export function Logo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       className={className}
       {...props}
     >
+      <defs>
+        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style={{ stopColor: 'hsl(350, 85%, 50%)', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: 'hsl(350, 85%, 60%)', stopOpacity: 1 }} />
+        </linearGradient>
+      </defs>
       <style>
         {`
           .title {
             font-family: 'PT Sans', sans-serif;
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 700;
-            fill: hsl(var(--foreground));
+            fill: url(#logoGradient);
+            letter-spacing: 0.025em;
           }
           .subtitle {
             font-family: 'PT Sans', sans-serif;
-            font-size: 10px;
-            fill: hsl(var(--foreground) / 0.8);
-            letter-spacing: 0.2em;
+            font-size: 16px;
+            font-weight: 700;
+            fill: url(#logoGradient);
+            letter-spacing: 0.05em;
           }
         `}
       </style>
-      <text x="50%" y="22" textAnchor="middle" className="title">
+      <text x="50%" y="24" textAnchor="middle" className="title">
         HAIR & RELAX
       </text>
-      <text x="50%" y="40" textAnchor="middle" className="subtitle">
+      <text x="50%" y="45" textAnchor="middle" className="subtitle">
         STUDIO
       </text>
     </svg>

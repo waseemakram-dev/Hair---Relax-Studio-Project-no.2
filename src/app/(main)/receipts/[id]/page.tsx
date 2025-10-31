@@ -1,7 +1,6 @@
 
 "use client"
 
-import { useRef } from 'react'
 import { useSalon } from "@/context/SalonProvider"
 import { PageHeader } from "@/components/PageHeader"
 import { PrintableReceipt } from "@/components/receipts/PrintableReceipt"
@@ -14,8 +13,6 @@ export default function ReceiptDetailsPage({ params }: { params: { id: string } 
   const { getReceiptById, services, products, workers, loading } = useSalon()
   const receipt = getReceiptById(params.id)
   
-  const printRef = useRef<HTMLDivElement>(null)
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -45,7 +42,7 @@ export default function ReceiptDetailsPage({ params }: { params: { id: string } 
       </PageHeader>
       <Card>
         <CardContent className="p-0">
-          <PrintableReceipt ref={printRef} receipt={receiptForPrint} services={services} products={products} worker={worker} />
+          <PrintableReceipt receipt={receiptForPrint} services={services} products={products} worker={worker} />
         </CardContent>
       </Card>
     </>

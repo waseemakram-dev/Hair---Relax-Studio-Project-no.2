@@ -35,6 +35,7 @@ import {
 import { Textarea } from "../ui/textarea"
 import { Sparkles, Loader2 } from "lucide-react"
 import type { Product, Service, Worker, Receipt } from "@/lib/types"
+import { PrintableReceipt } from "./PrintableReceipt"
 
 const formSchema = z.object({
   customerName: z.string().min(1, "Customer name is required."),
@@ -49,10 +50,9 @@ interface ReceiptFormProps {
   services: Service[]
   products: Product[]
   workers: Worker[]
-  PrintableReceipt: React.ReactElement
 }
 
-export function ReceiptForm({ onSubmit, services, products, workers, PrintableReceipt }: ReceiptFormProps) {
+export function ReceiptForm({ onSubmit, services, products, workers }: ReceiptFormProps) {
     const [isServiceDialogOpen, setServiceDialogOpen] = React.useState(false)
     const [isProductDialogOpen, setProductDialogOpen] = React.useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,12 +93,13 @@ export function ReceiptForm({ onSubmit, services, products, workers, PrintableRe
         
         const previewElement = document.getElementById('receipt-preview');
         if (previewElement) {
-            const previewInstance = React.cloneElement(PrintableReceipt, { 
+            const previewInstance = React.createElement(PrintableReceipt, {
                 receipt: previewData,
                 services,
                 products,
-                worker: selectedWorker
+                worker: selectedWorker,
             });
+
             const root = (window as any)._receiptPreviewRoot;
             if (root) {
                 root.render(previewInstance);
@@ -109,7 +110,7 @@ export function ReceiptForm({ onSubmit, services, products, workers, PrintableRe
                 (window as any)._receiptPreviewRoot = newRoot;
             }
         }
-    }, [watchedValues, services, products, workers, PrintableReceipt]);
+    }, [watchedValues, services, products, workers]);
 
 
     const handleFinalSubmit = async (values: z.infer<typeof formSchema>) => {

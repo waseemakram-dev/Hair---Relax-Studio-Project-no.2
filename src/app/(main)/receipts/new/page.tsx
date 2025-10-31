@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { useReactToPrint } from 'react-to-print'
 import { useSalon } from "@/context/SalonProvider"
 import { PageHeader } from "@/components/PageHeader"
@@ -17,7 +17,8 @@ export default function NewReceiptPage() {
   const { toast } = useToast()
   const router = useRouter()
   const printRef = useRef<HTMLDivElement>(null)
-  
+  const hiddenPrintTriggerRef = useRef<HTMLButtonElement>(null)
+
   const handlePrint = useReactToPrint({
       content: () => printRef.current,
   })
@@ -30,11 +31,13 @@ export default function NewReceiptPage() {
             description: `Customer: ${values.customerName}`,
         })
         
-        // After saving, trigger the print and then navigate
+        // After saving, trigger the hidden print button and then navigate
         const printAndNavigate = () => {
             // A small delay to ensure the preview is updated before printing
             setTimeout(() => {
-                handlePrint();
+                if (hiddenPrintTriggerRef.current) {
+                    hiddenPrintTriggerRef.current.click();
+                }
                 router.push(`/receipts/${newReceipt.id}`);
             }, 100);
         };
@@ -64,9 +67,6 @@ export default function NewReceiptPage() {
                     services={services}
                     products={products}
                     workers={workers}
-                    PrintableReceipt={
-                        <PrintableReceipt ref={printRef} />
-                    }
                 />
             </div>
             <div className="lg:col-span-2">
@@ -77,6 +77,8 @@ export default function NewReceiptPage() {
                         </div>
                     </CardContent>
                 </Card>
+                 {/* This is the actual print trigger, but it's hidden. */}
+                <button ref={hiddenPrintTriggerRef} onClick={handlePrint} style={{ display: 'none' }}>Print</button>
             </div>
         </div>
     </>

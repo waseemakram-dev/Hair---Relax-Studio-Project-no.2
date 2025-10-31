@@ -8,10 +8,11 @@ import { PrintableReceipt } from "@/components/receipts/PrintableReceipt"
 import { notFound } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
-import { Printer } from 'lucide-react'
+import { Printer, Loader2 } from 'lucide-react'
+import type { Timestamp } from 'firebase/firestore'
 
 export default function ReceiptDetailsPage({ params }: { params: { id: string } }) {
-  const { getReceiptById, services, products, workers } = useSalon()
+  const { getReceiptById, services, products, workers, loading } = useSalon()
   const receipt = getReceiptById(params.id)
   
   const printRef = useRef<HTMLDivElement>(null)
@@ -19,11 +20,23 @@ export default function ReceiptDetailsPage({ params }: { params: { id: string } 
       content: () => printRef.current,
   })
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
   if (!receipt) {
     notFound()
   }
 
   const worker = workers.find(w => w.id === receipt.workerId)
+  
+  const receiptDate = receipt.createdAt instanceof Date 
+    ? receipt.createdAt 
+    : (receipt.createdAt as Timestamp).toDate();
 
   return (
     <>
@@ -35,7 +48,7 @@ export default function ReceiptDetailsPage({ params }: { params: { id: string } 
       </PageHeader>
       <Card>
         <CardContent className="p-0">
-          <PrintableReceipt ref={printRef} receipt={receipt} services={services} products={products} worker={worker} />
+          <PrintableReceipt ref={printRef} receipt={{...receipt, createdAt: receiptDate}} services={services} products={products} worker={worker} />
         </CardContent>
       </Card>
     </>

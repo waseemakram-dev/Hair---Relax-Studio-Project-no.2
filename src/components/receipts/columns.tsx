@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
+import type { Timestamp } from "firebase/firestore"
 
 interface ReceiptsColumnsProps {
   workers: Worker[]
@@ -36,7 +37,8 @@ export const getColumns = ({ workers }: ReceiptsColumnsProps): ColumnDef<Receipt
     accessorKey: "createdAt",
     header: "Date",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"))
+      const ts = row.getValue("createdAt") as Timestamp | Date;
+      const date = ts instanceof Date ? ts : ts.toDate();
       return <div>{date.toLocaleDateString()}</div>
     }
   },

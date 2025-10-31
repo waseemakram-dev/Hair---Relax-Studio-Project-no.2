@@ -17,10 +17,17 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import type { Timestamp } from "firebase/firestore"
 
 export function RecentReceipts() {
   const { receipts, workers } = useSalon()
-  const recentReceipts = receipts.slice(0, 5)
+  const recentReceipts = [...receipts]
+    .sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : (a.createdAt as Timestamp).toMillis();
+        const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : (b.createdAt as Timestamp).toMillis();
+        return dateB - dateA;
+    })
+    .slice(0, 5)
 
   return (
     <Card>
@@ -41,11 +48,12 @@ export function RecentReceipts() {
             {recentReceipts.length > 0 ? (
               recentReceipts.map((receipt) => {
                 const worker = workers.find(w => w.id === receipt.workerId)
+                const createdAt = receipt.createdAt instanceof Date ? receipt.createdAt : (receipt.createdAt as Timestamp).toDate();
                 return (
                   <TableRow key={receipt.id}>
                     <TableCell>
                       <div className="font-medium">{receipt.customerName}</div>
-                      <div className="text-sm text-muted-foreground">{new Date(receipt.createdAt).toLocaleTimeString()}</div>
+                      <div className="text-sm text-muted-foreground">{createdAt.toLocaleTimeString()}</div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">{worker?.name || 'N/A'}</Badge>

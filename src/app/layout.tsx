@@ -3,6 +3,8 @@ import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import { SalonProvider } from '@/context/SalonProvider';
 import { FirebaseClientProvider } from '@/firebase';
+import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 
 export const metadata: Metadata = {
   title: 'SalonFlow',
@@ -24,7 +26,12 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <FirebaseClientProvider>
           <SalonProvider>
-            {children}
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
+                {children}
+              </SidebarInset>
+            </SidebarProvider>
           </SalonProvider>
         </FirebaseClientProvider>
         <Toaster />

@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export interface Service {
   id: string;
   name: string;
@@ -12,7 +14,7 @@ export interface Product {
 }
 
 export interface Worker {
-  id: string;
+  id:string;
   name: string;
   customers: number;
   sales: number;
@@ -26,5 +28,5 @@ export interface Receipt {
   productIds: { id: string; quantity: number }[];
   discount: number;
   total: number;
-  createdAt: Date;
+  createdAt: Timestamp | Date;
 }

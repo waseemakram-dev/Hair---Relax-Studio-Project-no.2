@@ -1,8 +1,7 @@
 
 "use client"
 
-import { useRef, useState } from "react"
-import { useReactToPrint } from 'react-to-print'
+import { useRef } from "react"
 import { useSalon } from "@/context/SalonProvider"
 import { PageHeader } from "@/components/PageHeader"
 import { ReceiptForm } from "@/components/receipts/ReceiptForm"
@@ -10,18 +9,12 @@ import { PrintableReceipt } from "@/components/receipts/PrintableReceipt"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import type { Receipt } from "@/lib/types"
 
 export default function NewReceiptPage() {
   const { services, products, workers, addReceipt } = useSalon()
   const { toast } = useToast()
   const router = useRouter()
   const printRef = useRef<HTMLDivElement>(null)
-  const hiddenPrintTriggerRef = useRef<HTMLButtonElement>(null)
-
-  const handlePrint = useReactToPrint({
-      content: () => printRef.current,
-  })
 
   const handleSubmit = async (values: any) => {
     try {
@@ -30,19 +23,7 @@ export default function NewReceiptPage() {
             title: "Receipt Created Successfully!",
             description: `Customer: ${values.customerName}`,
         })
-        
-        // After saving, trigger the hidden print button and then navigate
-        const printAndNavigate = () => {
-            // A small delay to ensure the preview is updated before printing
-            setTimeout(() => {
-                if (hiddenPrintTriggerRef.current) {
-                    hiddenPrintTriggerRef.current.click();
-                }
-                router.push(`/receipts/${newReceipt.id}`);
-            }, 100);
-        };
-        
-        printAndNavigate();
+        router.push(`/receipts/${newReceipt.id}`);
 
     } catch (error) {
         console.error("Error creating receipt:", error);
@@ -77,8 +58,6 @@ export default function NewReceiptPage() {
                         </div>
                     </CardContent>
                 </Card>
-                 {/* This is the actual print trigger, but it's hidden. */}
-                <button ref={hiddenPrintTriggerRef} onClick={handlePrint} style={{ display: 'none' }}>Print</button>
             </div>
         </div>
     </>

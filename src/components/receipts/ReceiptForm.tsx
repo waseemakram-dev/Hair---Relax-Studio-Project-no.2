@@ -308,7 +308,7 @@ export function ReceiptForm({ onSubmit, services, products, workers }: ReceiptFo
              {isSubmitting ? (
                 <Loader2 className="animate-spin" />
             ) : (
-                'Print & Finalize Sale'
+                'Finalize Sale'
             )}
         </Button>
       </form>

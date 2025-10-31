@@ -4,10 +4,8 @@ import {
   LayoutDashboard,
   Package,
   Users,
-  Receipt,
   BarChart,
   Settings,
-  PlusCircle,
   Scissors
 } from "lucide-react"
 import {
@@ -19,7 +17,6 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from "@/components/ui/sidebar"
-import { Button } from "./ui/button"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/firebase"
@@ -31,7 +28,6 @@ const menuItems = [
   { href: "/products", label: "Inventory", icon: Package },
   { href: "/services", label: "Services", icon: Scissors },
   { href: "/workers", label: "Workers", icon: Users },
-  { href: "/receipts", label: "Receipts", icon: Receipt },
   { href: "/reports", label: "Sales Report", icon: BarChart },
 ]
 
@@ -72,12 +68,6 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 space-y-2 border-t border-sidebar-border">
-        <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 text-base h-12">
-            <Link href="/receipts/new">
-                <PlusCircle className="h-5 w-5" />
-                <span>New Receipt</span>
-            </Link>
-        </Button>
         <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton className="font-medium text-base h-12 text-muted-foreground hover:text-foreground">

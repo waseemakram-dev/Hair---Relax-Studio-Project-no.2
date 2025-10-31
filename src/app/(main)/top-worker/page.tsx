@@ -27,7 +27,7 @@ export default function TopWorkerPage() {
           <CardContent className="grid grid-cols-2 gap-4 text-center">
             <div className="flex flex-col items-center">
               <DollarSign className="h-8 w-8 text-primary" />
-              <p className="text-2xl font-bold mt-2">${topWorker.sales.toFixed(2)}</p>
+              <p className="text-2xl font-bold mt-2">Rs {topWorker.sales.toFixed(2)}</p>
               <p className="text-sm text-muted-foreground">Total Sales</p>
             </div>
             <div className="flex flex-col items-center">

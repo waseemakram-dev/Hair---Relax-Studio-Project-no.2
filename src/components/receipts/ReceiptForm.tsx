@@ -144,7 +144,7 @@ export function ReceiptForm({ onSubmit }: ReceiptFormProps) {
                                     </FormLabel>
                                   </div>
                                   <div className="flex items-center gap-4">
-                                      <span className="text-sm font-medium">${service.price.toFixed(2)}</span>
+                                      <span className="text-sm font-medium">Rs {service.price.toFixed(2)}</span>
                                       <FormControl>
                                         <Checkbox
                                           checked={field.value?.includes(service.id)}
@@ -205,7 +205,7 @@ export function ReceiptForm({ onSubmit }: ReceiptFormProps) {
                                     </FormLabel>
                                   </div>
                                   <div className="flex items-center gap-4">
-                                      <span className="text-sm font-medium">${product.price.toFixed(2)}</span>
+                                      <span className="text-sm font-medium">Rs {product.price.toFixed(2)}</span>
                                       <FormControl>
                                         <Checkbox
                                           checked={isChecked}
@@ -239,7 +239,7 @@ export function ReceiptForm({ onSubmit }: ReceiptFormProps) {
                     <div className="space-y-4">
                         <div className="flex justify-between">
                             <span>Subtotal</span>
-                            <span>${subtotal.toFixed(2)}</span>
+                            <span>Rs {subtotal.toFixed(2)}</span>
                         </div>
                         <FormField
                             control={form.control}
@@ -257,7 +257,7 @@ export function ReceiptForm({ onSubmit }: ReceiptFormProps) {
                         <Separator />
                         <div className="flex justify-between text-lg font-bold">
                             <span>Total</span>
-                            <span>${total.toFixed(2)}</span>
+                            <span>Rs {total.toFixed(2)}</span>
                         </div>
                         <Button type="submit" className="w-full">Create Receipt</Button>
                     </div>

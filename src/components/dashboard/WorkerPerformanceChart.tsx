@@ -29,7 +29,7 @@ export function WorkerPerformanceChart() {
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                        <YAxis tickFormatter={(value) => `$${value}`} tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                        <YAxis tickFormatter={(value) => `Rs ${value}`} tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                         <Tooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
                         <Bar dataKey="sales" fill="var(--color-sales)" radius={4} />
                     </BarChart>

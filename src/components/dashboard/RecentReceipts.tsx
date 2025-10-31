@@ -58,7 +58,7 @@ export function RecentReceipts() {
                     <TableCell>
                       <Badge variant="outline">{worker?.name || 'N/A'}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">${receipt.total.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">Rs {receipt.total.toFixed(2)}</TableCell>
                   </TableRow>
                 )
               })

@@ -71,13 +71,13 @@ export const PrintableReceipt = React.forwardRef<HTMLDivElement, PrintableReceip
                   {receiptServices.map(service => (
                     <tr key={service.id} className="border-b">
                       <td className="py-2">{service.name}</td>
-                      <td className="text-right py-2">${service.price.toFixed(2)}</td>
+                      <td className="text-right py-2">Rs {service.price.toFixed(2)}</td>
                     </tr>
                   ))}
                   {receiptProducts.map(product => (
                     <tr key={product.id} className="border-b">
                       <td className="py-2">{product.name} (x{product.quantity})</td>
-                      <td className="text-right py-2">${(product.price * product.quantity).toFixed(2)}</td>
+                      <td className="text-right py-2">Rs {(product.price * product.quantity).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -87,18 +87,18 @@ export const PrintableReceipt = React.forwardRef<HTMLDivElement, PrintableReceip
             <div className="mt-4 text-sm space-y-2">
                 <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>Rs {subtotal.toFixed(2)}</span>
                 </div>
                 {receipt.discount > 0 && (
                     <div className="flex justify-between">
                         <span>Discount ({receipt.discount}%)</span>
-                        <span className="text-green-600">-${discountAmount.toFixed(2)}</span>
+                        <span className="text-green-600">-Rs {discountAmount.toFixed(2)}</span>
                     </div>
                 )}
                  <Separator className="my-2"/>
                  <div className="flex justify-between font-bold text-base">
                     <span>Total</span>
-                    <span>${receipt.total.toFixed(2)}</span>
+                    <span>Rs {receipt.total.toFixed(2)}</span>
                 </div>
             </div>
             

@@ -48,7 +48,7 @@ export default function ReportsPage() {
                 <CardTitle className="text-sm font-medium">Total Salon Sales</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">${totalSales.toFixed(2)}</div>
+                <div className="text-2xl font-bold">Rs {totalSales.toFixed(2)}</div>
             </CardContent>
         </Card>
         <Card>
@@ -78,7 +78,7 @@ export default function ReportsPage() {
                         <TableRow key={worker.id}>
                             <TableCell className="font-medium">{worker.name}</TableCell>
                             <TableCell>{worker.customers}</TableCell>
-                            <TableCell className="text-right">${worker.sales.toFixed(2)}</TableCell>
+                            <TableCell className="text-right">Rs {worker.sales.toFixed(2)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

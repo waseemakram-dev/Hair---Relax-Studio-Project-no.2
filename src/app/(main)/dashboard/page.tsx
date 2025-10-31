@@ -31,7 +31,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Today's Revenue"
-          value={`$${todaysSales.toFixed(2)}`}
+          value={`Rs ${todaysSales.toFixed(2)}`}
           icon={DollarSign}
           description="Total revenue generated today."
         />

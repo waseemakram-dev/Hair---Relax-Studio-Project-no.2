@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { useReactToPrint } from 'react-to-print'
 import { useSalon } from "@/context/SalonProvider"
 import { PageHeader } from "@/components/PageHeader"
@@ -11,25 +11,18 @@ import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import type { Receipt } from "@/lib/types"
-import { Button } from "@/components/ui/button"
 
 export default function NewReceiptPage() {
   const { services, products, workers, addReceipt } = useSalon()
   const { toast } = useToast()
   const router = useRouter()
   const printRef = useRef<HTMLDivElement>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [printTrigger, setPrintTrigger] = useState<(() => void) | null>(null)
-
+  
   const handlePrint = useReactToPrint({
       content: () => printRef.current,
-      onAfterPrint: () => {
-        // This is where we will navigate after printing
-      },
   })
 
-  const handleSubmit = async (values: any, previewData: Omit<Receipt, 'id' | 'createdAt'>) => {
-    setIsSubmitting(true)
+  const handleSubmit = async (values: any) => {
     try {
         const newReceipt = await addReceipt(values)
         toast({
@@ -39,15 +32,14 @@ export default function NewReceiptPage() {
         
         // After saving, trigger the print and then navigate
         const printAndNavigate = () => {
-            handlePrint();
-            router.push(`/receipts/${newReceipt.id}`);
+            // A small delay to ensure the preview is updated before printing
+            setTimeout(() => {
+                handlePrint();
+                router.push(`/receipts/${newReceipt.id}`);
+            }, 100);
         };
         
-        // A small delay to ensure state updates before printing
-        setTimeout(() => {
-            printAndNavigate();
-            setIsSubmitting(false)
-        }, 100);
+        printAndNavigate();
 
     } catch (error) {
         console.error("Error creating receipt:", error);
@@ -56,7 +48,6 @@ export default function NewReceiptPage() {
             title: "Error Creating Receipt",
             description: "There was an error creating the receipt. Please try again.",
         })
-        setIsSubmitting(false)
     }
   }
 
@@ -73,7 +64,6 @@ export default function NewReceiptPage() {
                     services={services}
                     products={products}
                     workers={workers}
-                    isSubmitting={isSubmitting}
                     PrintableReceipt={
                         <PrintableReceipt ref={printRef} />
                     }

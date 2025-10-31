@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -45,25 +45,25 @@ const formSchema = z.object({
 })
 
 interface ReceiptFormProps {
-  onSubmit: (values: z.infer<typeof formSchema>, previewData: Omit<Receipt, 'id'|'createdAt'>) => void
+  onSubmit: (values: z.infer<typeof formSchema>) => void
   services: Service[]
   products: Product[]
   workers: Worker[]
   PrintableReceipt: React.ReactElement
-  isSubmitting: boolean
 }
 
-export function ReceiptForm({ onSubmit, services, products, workers, PrintableReceipt, isSubmitting }: ReceiptFormProps) {
+export function ReceiptForm({ onSubmit, services, products, workers, PrintableReceipt }: ReceiptFormProps) {
     const [isServiceDialogOpen, setServiceDialogOpen] = React.useState(false)
     const [isProductDialogOpen, setProductDialogOpen] = React.useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-        customerName: "",
-        serviceIds: [],
-        productIds: [],
-        discount: 0,
+            customerName: "",
+            serviceIds: [],
+            productIds: [],
+            discount: 0,
         },
     })
 
@@ -112,19 +112,10 @@ export function ReceiptForm({ onSubmit, services, products, workers, PrintableRe
     }, [watchedValues, services, products, workers, PrintableReceipt]);
 
 
-    const handleFinalSubmit = (values: z.infer<typeof formSchema>) => {
-        const subtotal = (values.serviceIds || []).reduce((acc, id) => {
-            const service = services.find(s => s.id === id);
-            return acc + (service?.price || 0);
-          }, 0) + (values.productIds || []).reduce((acc, item) => {
-            const product = products.find(p => p.id === item.id);
-            return acc + (product?.price || 0) * item.quantity;
-          }, 0);
-        
-        const total = subtotal - (subtotal * ((values.discount || 0) / 100));
-        
-        const previewData: Omit<Receipt, 'id'|'createdAt'> = { ...values, total };
-        onSubmit(values, previewData);
+    const handleFinalSubmit = async (values: z.infer<typeof formSchema>) => {
+        setIsSubmitting(true);
+        await onSubmit(values);
+        setIsSubmitting(false);
     }
   
   return (
@@ -158,7 +149,7 @@ export function ReceiptForm({ onSubmit, services, products, workers, PrintableRe
                         </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                        {workers.map(worker => (
+                        {workers.filter(w => !w.archived).map(worker => (
                         <SelectItem key={worker.id} value={worker.id}>{worker.name}</SelectItem>
                         ))}
                     </SelectContent>

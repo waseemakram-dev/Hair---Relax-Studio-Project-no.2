@@ -9,6 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
   Select,
@@ -21,7 +27,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import type { Worker, Sale } from "@/lib/types"
 import { DollarSign, Users, CalendarDays } from "lucide-react"
 import type { Timestamp } from "firebase/firestore"
-import { format, startOfDay } from "date-fns"
+import { format, startOfDay, parse } from "date-fns"
 
 interface WorkerReportProps {
     workers: Worker[];
@@ -31,6 +37,10 @@ interface WorkerReportProps {
 export function WorkerReport({ workers, sales }: WorkerReportProps) {
     const activeWorkers = useMemo(() => workers.filter(w => !w.archived), [workers])
     const [selectedWorkerId, setSelectedWorkerId] = useState<string | undefined>(activeWorkers[0]?.id);
+    const [isDetailOpen, setDetailOpen] = useState(false);
+    const [selectedDaySales, setSelectedDaySales] = useState<Sale[]>([]);
+    const [selectedDate, setSelectedDate] = useState<string>('');
+
 
     const selectedWorker = useMemo(() => {
         return activeWorkers.find(w => w.id === selectedWorkerId);
@@ -65,6 +75,18 @@ export function WorkerReport({ workers, sales }: WorkerReportProps) {
         return Object.entries(breakdown).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime());
 
     }, [workerSales]);
+
+    const handleRowClick = (dateString: string) => {
+        const clickedDate = parse(dateString, "MMMM dd, yyyy", new Date());
+        const daySales = workerSales.filter(sale => {
+            const saleDate = sale.createdAt instanceof Date ? sale.createdAt : (sale.createdAt as Timestamp).toDate();
+            return startOfDay(saleDate).getTime() === startOfDay(clickedDate).getTime();
+        });
+        setSelectedDaySales(daySales);
+        setSelectedDate(dateString);
+        setDetailOpen(true);
+    };
+
 
     return (
         <Card className="mt-4">
@@ -143,13 +165,17 @@ export function WorkerReport({ workers, sales }: WorkerReportProps) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {dailyBreakdown.map(([date, data]) => (
-                                        <TableRow key={date}>
+                                    {dailyBreakdown.length > 0 ? dailyBreakdown.map(([date, data]) => (
+                                        <TableRow key={date} onClick={() => handleRowClick(date)} className="cursor-pointer">
                                             <TableCell className="font-medium">{date}</TableCell>
                                             <TableCell>{data.customers}</TableCell>
                                             <TableCell className="text-right">Rs {data.sales.toFixed(2)}</TableCell>
                                         </TableRow>
-                                    ))}
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center h-24">No sales data for this worker.</TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </div>
@@ -161,6 +187,33 @@ export function WorkerReport({ workers, sales }: WorkerReportProps) {
                     </div>
                 )}
             </CardContent>
+             <Dialog open={isDetailOpen} onOpenChange={setDetailOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Sales Details for {selectedDate}</DialogTitle>
+                    </DialogHeader>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Customer</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {selectedDaySales.length > 0 ? selectedDaySales.map(sale => (
+                                <TableRow key={sale.id}>
+                                    <TableCell className="font-medium">{sale.customerName}</TableCell>
+                                    <TableCell className="text-right">Rs {sale.total.toFixed(2)}</TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={2} className="text-center h-24">No sales found for this day.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </DialogContent>
+            </Dialog>
         </Card>
     )
 }

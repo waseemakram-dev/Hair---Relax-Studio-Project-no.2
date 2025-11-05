@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 import type { Sale, Worker } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,12 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { Timestamp } from "firebase/firestore"
+import Link from "next/link"
 
 interface SalesColumnsProps {
   workers: Worker[]
+  onDelete: (id: string) => void
 }
 
-export const getColumns = ({ workers }: SalesColumnsProps): ColumnDef<Sale>[] => [
+export const getColumns = ({ workers, onDelete }: SalesColumnsProps): ColumnDef<Sale>[] => [
     {
     accessorKey: "id",
     header: "Invoice #",
@@ -77,12 +79,16 @@ export const getColumns = ({ workers }: SalesColumnsProps): ColumnDef<Sale>[] =>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {/* <DropdownMenuItem asChild>
+              <DropdownMenuItem asChild>
                 <Link href={`/sales/${sale.id}/edit`}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit Sale
                 </Link>
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDelete(sale.id)} className="text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Sale
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -13,7 +13,8 @@ import {
   writeBatch,
   serverTimestamp,
   Timestamp,
-  increment
+  increment,
+  runTransaction
 } from 'firebase/firestore';
 import { useUser } from '@/firebase';
 
@@ -33,6 +34,8 @@ interface SalonContextType {
   updateWorker: (worker: Worker) => Promise<void>;
   archiveWorker: (id: string) => Promise<void>;
   addSale: (sale: Omit<Sale, 'id' | 'createdAt' | 'total'>) => Promise<Sale>;
+  updateSale: (saleId: string, oldSale: Sale, newSaleData: Omit<Sale, 'id' | 'createdAt' | 'total'>) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
   getSaleById: (id: string) => Sale | undefined;
   getTodaysSales: () => number;
   getTodaysCustomers: () => number;
@@ -55,19 +58,21 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const { data: sales = [], loading: salesLoading } = useCollection<Sale>(salesCollection);
 
   const workers = useMemo(() => {
-    const workerSales = new Map<string, {sales: number, customers: number}>();
+    const workerStats = new Map<string, {sales: number, customers: number}>();
     
     sales.forEach(sale => {
-      const stats = workerSales.get(sale.workerId) || { sales: 0, customers: 0 };
-      stats.sales += sale.total;
-      stats.customers += 1;
-      workerSales.set(sale.workerId, stats);
+      if(sale.workerId) {
+        const stats = workerStats.get(sale.workerId) || { sales: 0, customers: 0 };
+        stats.sales += sale.total;
+        stats.customers += 1;
+        workerStats.set(sale.workerId, stats);
+      }
     });
 
     return baseWorkers.map(worker => ({
       ...worker,
-      sales: workerSales.get(worker.id)?.sales || 0,
-      customers: workerSales.get(worker.id)?.customers || 0,
+      sales: workerStats.get(worker.id)?.sales || 0,
+      customers: workerStats.get(worker.id)?.customers || 0,
     }));
   }, [baseWorkers, sales]);
 
@@ -164,6 +169,75 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     return { ...saleData, id: saleRef.id, createdAt: new Date(), total };
   };
 
+  const updateSale = async (saleId: string, oldSale: Sale, newSaleData: Omit<Sale, 'id' | 'createdAt' | 'total'>) => {
+    if (!salesCollection || !productsCollection) {
+        throw new Error("Collections not ready");
+    }
+
+    await runTransaction(firestore, async (transaction) => {
+        const saleRef = doc(salesCollection, saleId);
+
+        // 1. Calculate stock changes
+        const stockChanges = new Map<string, number>();
+
+        // Add back old quantities
+        oldSale.productIds.forEach(item => {
+            stockChanges.set(item.id, (stockChanges.get(item.id) || 0) + item.quantity);
+        });
+
+        // Subtract new quantities
+        newSaleData.productIds.forEach(item => {
+            stockChanges.set(item.id, (stockChanges.get(item.id) || 0) - item.quantity);
+        });
+
+        // 2. Apply stock changes
+        for (const [productId, change] of stockChanges.entries()) {
+            if (change !== 0) {
+                const productRef = doc(productsCollection, productId);
+                transaction.update(productRef, { stock: increment(change) });
+            }
+        }
+
+        // 3. Calculate new total
+        const servicesCost = newSaleData.serviceIds.reduce((acc, id) => {
+            const service = services.find(s => s.id === id);
+            return acc + (service?.price || 0);
+        }, 0);
+
+        const productsCost = newSaleData.productIds.reduce((acc, item) => {
+            const product = products.find(p => p.id === item.id);
+            return acc + (product?.price || 0) * item.quantity;
+        }, 0);
+
+        const subtotal = servicesCost + productsCost;
+        const total = subtotal - (subtotal * (newSaleData.discount / 100));
+
+        // 4. Update the sale document
+        transaction.update(saleRef, { ...newSaleData, total });
+    });
+  };
+  
+  const deleteSale = async (id: string) => {
+    if (!salesCollection || !productsCollection) return;
+    
+    const saleToDelete = sales.find(s => s.id === id);
+    if (!saleToDelete) return;
+
+    const batch = writeBatch(firestore);
+
+    // Restock products
+    saleToDelete.productIds.forEach(item => {
+        const productRef = doc(productsCollection, item.id);
+        batch.update(productRef, { stock: increment(item.quantity) });
+    });
+
+    // Delete sale
+    const saleRef = doc(salesCollection, id);
+    batch.delete(saleRef);
+    
+    await batch.commit();
+  };
+
   const getSaleById = (id: string) => sales.find(r => r.id === id);
   
   const getTodaysSales = () => {
@@ -173,20 +247,22 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     return sales.filter(r => {
-        const createdAt = (r.createdAt as Timestamp).toDate();
-        return createdAt >= today && createdAt < tomorrow;
+        const createdAt = r.createdAt as Timestamp | Date;
+        const date = createdAt instanceof Date ? createdAt : createdAt.toDate();
+        return date >= today && date < tomorrow;
     }).reduce((sum, r) => sum + r.total, 0);
   }
 
   const getTodaysCustomers = () => {
-    const today = new "new"();
+    const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     return sales.filter(r => {
-        const createdAt = (r.createdAt as Timestamp).toDate();
-        return createdAt >= today && createdAt < tomorrow;
+        const createdAt = r.createdAt as Timestamp | Date;
+        const date = createdAt instanceof Date ? createdAt : createdAt.toDate();
+        return date >= today && date < tomorrow;
     }).length;
   }
 
@@ -195,7 +271,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     addService, updateService, deleteService,
     addProduct, updateProduct, deleteProduct,
     addWorker, updateWorker, archiveWorker,
-    addSale, getSaleById,
+    addSale, updateSale, deleteSale, getSaleById,
     getTodaysSales, getTodaysCustomers
   };
 

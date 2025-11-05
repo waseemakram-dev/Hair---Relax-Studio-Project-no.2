@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -31,7 +31,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Loader2 } from "lucide-react"
-import type { Product, Service, Worker } from "@/lib/types"
+import type { Product, Service, Worker, Sale } from "@/lib/types"
 
 const formSchema = z.object({
   customerName: z.string().min(1, "Customer name is required."),
@@ -46,12 +46,14 @@ interface SaleFormProps {
   services: Service[]
   products: Product[]
   workers: Worker[]
+  existingSale?: Sale | null
 }
 
-export function SaleForm({ onSubmit, services, products, workers }: SaleFormProps) {
+export function SaleForm({ onSubmit, services, products, workers, existingSale }: SaleFormProps) {
     const [isServiceDialogOpen, setServiceDialogOpen] = React.useState(false)
     const [isProductDialogOpen, setProductDialogOpen] = React.useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const isEditMode = !!existingSale;
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -62,6 +64,18 @@ export function SaleForm({ onSubmit, services, products, workers }: SaleFormProp
             discount: 0,
         },
     })
+
+    useEffect(() => {
+      if (existingSale) {
+        form.reset({
+          customerName: existingSale.customerName,
+          workerId: existingSale.workerId,
+          serviceIds: existingSale.serviceIds,
+          productIds: existingSale.productIds,
+          discount: existingSale.discount,
+        })
+      }
+    }, [existingSale, form])
 
     const handleFinalSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsSubmitting(true);
@@ -93,7 +107,7 @@ export function SaleForm({ onSubmit, services, products, workers }: SaleFormProp
                 render={({ field }) => (
                 <FormItem>
                     <FormLabel>Assigned To</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                     <FormControl>
                         <SelectTrigger>
                         <SelectValue placeholder="Select a worker" />
@@ -127,7 +141,7 @@ export function SaleForm({ onSubmit, services, products, workers }: SaleFormProp
                                 <DialogTitle>Select Products</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-2 max-h-80 overflow-y-auto">
-                            {products.filter(p => p.stock > 0).map((product) => (
+                            {products.filter(p => p.stock > 0 || (existingSale?.productIds.some(ep => ep.id === p.id))).map((product) => (
                                 <FormField
                                     key={product.id}
                                     control={form.control}
@@ -245,7 +259,7 @@ export function SaleForm({ onSubmit, services, products, workers }: SaleFormProp
              {isSubmitting ? (
                 <Loader2 className="animate-spin" />
             ) : (
-                'Finalize Sale'
+                isEditMode ? 'Update Sale' : 'Finalize Sale'
             )}
         </Button>
       </form>

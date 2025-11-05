@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -25,9 +25,13 @@ import {
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import type { Worker, Sale } from "@/lib/types"
-import { DollarSign, Users, CalendarDays } from "lucide-react"
+import { DollarSign, Users, CalendarDays, PlusCircle, MinusCircle } from "lucide-react"
 import type { Timestamp } from "firebase/firestore"
 import { format, startOfDay, parse } from "date-fns"
+import { useSalon } from "@/context/SalonProvider"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Badge } from "../ui/badge"
+import { Separator } from "../ui/separator"
 
 interface WorkerReportProps {
     workers: Worker[];
@@ -35,6 +39,7 @@ interface WorkerReportProps {
 }
 
 export function WorkerReport({ workers, sales }: WorkerReportProps) {
+    const { services, products } = useSalon();
     const activeWorkers = useMemo(() => workers.filter(w => !w.archived), [workers])
     const [selectedWorkerId, setSelectedWorkerId] = useState<string | undefined>(activeWorkers[0]?.id);
     const [isDetailOpen, setDetailOpen] = useState(false);
@@ -81,6 +86,10 @@ export function WorkerReport({ workers, sales }: WorkerReportProps) {
         const daySales = workerSales.filter(sale => {
             const saleDate = sale.createdAt instanceof Date ? sale.createdAt : (sale.createdAt as Timestamp).toDate();
             return startOfDay(saleDate).getTime() === startOfDay(clickedDate).getTime();
+        }).sort((a,b) => {
+            const dateA = a.createdAt instanceof Date ? a.createdAt : (a.createdAt as Timestamp).toDate();
+            const dateB = b.createdAt instanceof Date ? b.createdAt : (b.createdAt as Timestamp).toDate();
+            return dateB.getTime() - dateA.getTime();
         });
         setSelectedDaySales(daySales);
         setSelectedDate(dateString);
@@ -188,30 +197,72 @@ export function WorkerReport({ workers, sales }: WorkerReportProps) {
                 )}
             </CardContent>
              <Dialog open={isDetailOpen} onOpenChange={setDetailOpen}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Sales Details for {selectedDate}</DialogTitle>
                     </DialogHeader>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Customer</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {selectedDaySales.length > 0 ? selectedDaySales.map(sale => (
-                                <TableRow key={sale.id}>
-                                    <TableCell className="font-medium">{sale.customerName}</TableCell>
-                                    <TableCell className="text-right">Rs {sale.total.toFixed(2)}</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={2} className="text-center h-24">No sales found for this day.</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                    <div className="max-h-[60vh] overflow-y-auto pr-4">
+                        {selectedDaySales.length > 0 ? (
+                             <Accordion type="single" collapsible className="w-full">
+                                {selectedDaySales.map(sale => {
+                                    const saleServices = services.filter(s => sale.serviceIds.includes(s.id));
+                                    const saleProducts = sale.productIds.map(p => {
+                                        const productInfo = products.find(prod => prod.id === p.id);
+                                        return { ...productInfo, quantity: p.quantity };
+                                    });
+
+                                    return (
+                                        <AccordionItem value={sale.id} key={sale.id}>
+                                            <AccordionTrigger>
+                                                <div className="flex justify-between w-full pr-4">
+                                                    <span className="font-medium">{sale.customerName}</span>
+                                                    <span className="font-semibold">Rs {sale.total.toFixed(2)}</span>
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent>
+                                                <div className="space-y-4 px-2">
+                                                    <div>
+                                                        <h4 className="font-semibold text-md mb-2">Items</h4>
+                                                        <ul className="space-y-1 text-sm text-muted-foreground">
+                                                            {saleServices.map(service => (
+                                                                <li key={service.id} className="flex justify-between">
+                                                                    <span>{service.name} <Badge variant="secondary">Service</Badge></span>
+                                                                    <span>Rs {service.price.toFixed(2)}</span>
+                                                                </li>
+                                                            ))}
+                                                            {saleProducts.map(product => (
+                                                                <li key={product.id} className="flex justify-between">
+                                                                    <span>{product.name} (x{product.quantity}) <Badge variant="outline">Product</Badge></span>
+                                                                    <span>Rs {(product.price! * product.quantity).toFixed(2)}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                    <Separator />
+                                                    <div className="space-y-2 text-sm">
+                                                         {sale.discount > 0 && (
+                                                            <div className="flex justify-between">
+                                                                <span className="text-muted-foreground">Discount</span>
+                                                                <span className="text-red-500 font-medium">- {sale.discount}%</span>
+                                                            </div>
+                                                         )}
+                                                         <div className="flex justify-between font-bold text-base">
+                                                            <span>Total</span>
+                                                            <span>Rs {sale.total.toFixed(2)}</span>
+                                                         </div>
+                                                    </div>
+                                                </div>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    )
+                                })}
+                             </Accordion>
+                        ) : (
+                           <div className="text-center h-24 flex items-center justify-center">
+                                No sales found for this day.
+                           </div>
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
         </Card>

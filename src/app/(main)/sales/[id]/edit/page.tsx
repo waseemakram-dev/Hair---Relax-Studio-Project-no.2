@@ -67,7 +67,7 @@ export default function EditSalePage() {
     <>
         <PageHeader
           title="Edit Sale"
-          description={`Editing invoice #${id.substring(0,6)}`}
+          description={`Editing sale #${id.substring(0,6)}`}
         />
         <div className="max-w-xl">
           <SaleForm 

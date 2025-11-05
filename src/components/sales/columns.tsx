@@ -23,7 +23,7 @@ interface SalesColumnsProps {
 export const getColumns = ({ workers, onDelete }: SalesColumnsProps): ColumnDef<Sale>[] => [
     {
     accessorKey: "id",
-    header: "Invoice #",
+    header: "Sale #",
     cell: ({ row }) => {
         return <span>#{(row.getValue("id") as string).substring(0,6)}</span>
     }

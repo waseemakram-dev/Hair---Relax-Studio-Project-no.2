@@ -7,6 +7,7 @@ import { FirebaseClientProvider } from '@/firebase';
 export const metadata: Metadata = {
   title: 'SalonFlow',
   description: 'Customer Receipt System for Salons',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

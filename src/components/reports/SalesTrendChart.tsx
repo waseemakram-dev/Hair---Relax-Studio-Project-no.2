@@ -18,7 +18,7 @@ import {
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import type { Sale } from "@/lib/types"
 import type { Timestamp } from "firebase/firestore"
-import { eachDayOfInterval, format, startOfDay } from "date-fns"
+import { eachDayOfInterval, format, startOfDay, isSameDay } from "date-fns"
 
 interface SalesTrendChartProps {
   sales: Sale[]
@@ -27,14 +27,15 @@ interface SalesTrendChartProps {
 }
 
 export function SalesTrendChart({ sales, from, to }: SalesTrendChartProps) {
+    
   const salesByDay = sales.reduce((acc, sale) => {
     const saleDate = sale.createdAt instanceof Date ? sale.createdAt : (sale.createdAt as Timestamp).toDate();
-    const day = format(saleDate, "MMM d")
+    const day = format(startOfDay(saleDate), "MMM d")
     acc[day] = (acc[day] || 0) + sale.total
     return acc
   }, {} as Record<string, number>)
-
-  const dateInterval = eachDayOfInterval({ start: from, end: to });
+  
+  const dateInterval = isSameDay(from, to) ? [startOfDay(from)] : eachDayOfInterval({ start: startOfDay(from), end: startOfDay(to) });
   
   const chartData = dateInterval.map(date => {
       const dayKey = format(date, "MMM d");

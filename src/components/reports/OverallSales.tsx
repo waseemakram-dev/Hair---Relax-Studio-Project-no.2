@@ -43,7 +43,10 @@ export function OverallSales({ sales }: { sales: Sale[] }) {
   
   const filteredSales = sales.filter(sale => {
     const saleDate = sale.createdAt instanceof Date ? sale.createdAt : (sale.createdAt as Timestamp).toDate()
-    return saleDate >= dateRange.from! && saleDate <= dateRange.to!
+    const saleDayStart = startOfDay(saleDate);
+    // Adjust range to be inclusive of the 'to' date
+    const rangeEnd = dateRange.to ? new Date(dateRange.to.getTime() + 86399999) : new Date();
+    return saleDayStart >= dateRange.from! && saleDayStart < rangeEnd
   })
 
   const totalRevenue = filteredSales.reduce((acc, sale) => acc + sale.total, 0)
@@ -52,6 +55,13 @@ export function OverallSales({ sales }: { sales: Sale[] }) {
   const handlePresetChange = (value: string) => {
     const now = startOfDay(new Date())
     switch (value) {
+      case "today":
+        setDateRange({ from: now, to: now });
+        break;
+      case "yesterday":
+        const yesterday = addDays(now, -1);
+        setDateRange({ from: yesterday, to: yesterday });
+        break;
       case "7":
         setDateRange({ from: addDays(now, -6), to: now })
         break
@@ -79,6 +89,8 @@ export function OverallSales({ sales }: { sales: Sale[] }) {
                         <SelectValue placeholder="Select period" />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="yesterday">Yesterday</SelectItem>
                         <SelectItem value="7">Last 7 Days</SelectItem>
                         <SelectItem value="30">Last 30 Days</SelectItem>
                         <SelectItem value="90">Last 90 Days</SelectItem>

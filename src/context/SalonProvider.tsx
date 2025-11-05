@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { createContext, useContext, ReactNode, useMemo, useEffect, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import type { Service, Product, Worker, Sale } from '@/lib/types';
 import { useFirestore, useCollection } from '@/firebase';
 import {
@@ -52,29 +53,23 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const { data: products = [], loading: productsLoading } = useCollection<Product>(productsCollection);
   const { data: baseWorkers = [], loading: workersLoading } = useCollection<Worker>(baseWorkersCollection);
   const { data: sales = [], loading: salesLoading } = useCollection<Sale>(salesCollection);
-  
-  const [workers, setWorkers] = useState<Worker[]>([]);
 
-  useEffect(() => {
-    if(!workersLoading && !salesLoading) {
-      const workerSales = new Map<string, {sales: number, customers: number}>();
-      
-      sales.forEach(sale => {
-        const stats = workerSales.get(sale.workerId) || { sales: 0, customers: 0 };
-        stats.sales += sale.total;
-        stats.customers += 1;
-        workerSales.set(sale.workerId, stats);
-      });
+  const workers = useMemo(() => {
+    const workerSales = new Map<string, {sales: number, customers: number}>();
+    
+    sales.forEach(sale => {
+      const stats = workerSales.get(sale.workerId) || { sales: 0, customers: 0 };
+      stats.sales += sale.total;
+      stats.customers += 1;
+      workerSales.set(sale.workerId, stats);
+    });
 
-      const updatedWorkers = baseWorkers.map(worker => ({
-        ...worker,
-        sales: workerSales.get(worker.id)?.sales || 0,
-        customers: workerSales.get(worker.id)?.customers || 0,
-      }));
-      
-      setWorkers(updatedWorkers);
-    }
-  }, [baseWorkers, sales, workersLoading, salesLoading])
+    return baseWorkers.map(worker => ({
+      ...worker,
+      sales: workerSales.get(worker.id)?.sales || 0,
+      customers: workerSales.get(worker.id)?.customers || 0,
+    }));
+  }, [baseWorkers, sales]);
 
 
   const loading = userLoading || servicesLoading || productsLoading || workersLoading || salesLoading;
@@ -184,7 +179,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const getTodaysCustomers = () => {
-    const today = new Date();
+    const today = new "new"();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);

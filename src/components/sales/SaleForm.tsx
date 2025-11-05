@@ -30,8 +30,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Loader2 } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { Loader2, CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 import type { Product, Service, Worker, Sale } from "@/lib/types"
+import type { Timestamp } from "firebase/firestore"
 
 const formSchema = z.object({
   customerName: z.string().min(1, "Customer name is required."),
@@ -39,6 +44,7 @@ const formSchema = z.object({
   serviceIds: z.array(z.string()).default([]),
   productIds: z.array(z.object({ id: z.string(), quantity: z.number().min(1) })).default([]),
   discount: z.coerce.number().min(0).max(100).default(0),
+  createdAt: z.date(),
 })
 
 interface SaleFormProps {
@@ -62,17 +68,20 @@ export function SaleForm({ onSubmit, services, products, workers, existingSale }
             serviceIds: [],
             productIds: [],
             discount: 0,
+            createdAt: new Date(),
         },
     })
 
     useEffect(() => {
       if (existingSale) {
+        const createdAtDate = existingSale.createdAt instanceof Date ? existingSale.createdAt : (existingSale.createdAt as Timestamp).toDate();
         form.reset({
           customerName: existingSale.customerName,
           workerId: existingSale.workerId,
           serviceIds: existingSale.serviceIds,
           productIds: existingSale.productIds,
           discount: existingSale.discount,
+          createdAt: createdAtDate,
         })
       }
     }, [existingSale, form])
@@ -101,28 +110,71 @@ export function SaleForm({ onSubmit, services, products, workers, existingSale }
                 </FormItem>
                 )}
             />
-            <FormField
-                control={form.control}
-                name="workerId"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Assigned To</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Select a worker" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        {workers.filter(w => !w.archived).map(worker => (
-                        <SelectItem key={worker.id} value={worker.id}>{worker.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                  control={form.control}
+                  name="workerId"
+                  render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>Assigned To</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                      <FormControl>
+                          <SelectTrigger>
+                          <SelectValue placeholder="Select a worker" />
+                          </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                          {workers.filter(w => !w.archived).map(worker => (
+                          <SelectItem key={worker.id} value={worker.id}>{worker.name}</SelectItem>
+                          ))}
+                      </SelectContent>
+                      </Select>
+                      <FormMessage />
+                  </FormItem>
+                  )}
+              />
+               <FormField
+                  control={form.control}
+                  name="createdAt"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Sale Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
             </CardContent>
         </Card>
 

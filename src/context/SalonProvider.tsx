@@ -33,8 +33,8 @@ interface SalonContextType {
   addWorker: (worker: Omit<Worker, 'id' | 'customers' | 'sales'>) => Promise<void>;
   updateWorker: (worker: Worker) => Promise<void>;
   archiveWorker: (id: string) => Promise<void>;
-  addSale: (sale: Omit<Sale, 'id' | 'createdAt' | 'total'>) => Promise<Sale>;
-  updateSale: (saleId: string, oldSale: Sale, newSaleData: Omit<Sale, 'id' | 'createdAt' | 'total'>) => Promise<void>;
+  addSale: (sale: Omit<Sale, 'id' | 'total'>) => Promise<Sale>;
+  updateSale: (saleId: string, oldSale: Sale, newSaleData: Omit<Sale, 'id' | 'total'>) => Promise<void>;
   deleteSale: (id: string) => Promise<void>;
   getSaleById: (id: string) => Sale | undefined;
   getTodaysSales: () => number;
@@ -128,7 +128,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   };
 
 
-  const addSale = async (saleData: Omit<Sale, 'id' | 'createdAt' | 'total'>): Promise<Sale> => {
+  const addSale = async (saleData: Omit<Sale, 'id' | 'total'>): Promise<Sale> => {
     if (!salesCollection || !productsCollection) {
       throw new Error("Collections not ready");
     }
@@ -148,7 +148,6 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   
     const newSaleData = {
       ...saleData,
-      createdAt: serverTimestamp(),
       total,
     };
     
@@ -166,10 +165,10 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   
     await batch.commit();
 
-    return { ...saleData, id: saleRef.id, createdAt: new Date(), total };
+    return { ...saleData, id: saleRef.id, total };
   };
 
-  const updateSale = async (saleId: string, oldSale: Sale, newSaleData: Omit<Sale, 'id' | 'createdAt' | 'total'>) => {
+  const updateSale = async (saleId: string, oldSale: Sale, newSaleData: Omit<Sale, 'id' | 'total'>) => {
     if (!salesCollection || !productsCollection) {
         throw new Error("Collections not ready");
     }

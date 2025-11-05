@@ -50,7 +50,7 @@ export default function ReportsPage() {
           <OverallSales sales={sales} />
         </TabsContent>
         <TabsContent value="workers">
-          <WorkerReport workers={workers} />
+          <WorkerReport workers={workers} sales={sales} />
         </TabsContent>
       </Tabs>
     </>

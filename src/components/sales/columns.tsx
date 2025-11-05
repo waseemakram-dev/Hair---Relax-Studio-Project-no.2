@@ -1,10 +1,10 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import type { Receipt, Worker } from "@/lib/types"
+import type { Sale, Worker } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Eye, MoreHorizontal } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,14 +12,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import Link from "next/link"
 import type { Timestamp } from "firebase/firestore"
 
-interface ReceiptsColumnsProps {
+interface SalesColumnsProps {
   workers: Worker[]
 }
 
-export const getColumns = ({ workers }: ReceiptsColumnsProps): ColumnDef<Receipt>[] => [
+export const getColumns = ({ workers }: SalesColumnsProps): ColumnDef<Sale>[] => [
     {
     accessorKey: "id",
     header: "Invoice #",
@@ -65,7 +64,7 @@ export const getColumns = ({ workers }: ReceiptsColumnsProps): ColumnDef<Receipt
   {
     id: "actions",
     cell: ({ row }) => {
-      const receipt = row.original
+      const sale = row.original
 
       return (
         <div className="text-right">
@@ -78,12 +77,12 @@ export const getColumns = ({ workers }: ReceiptsColumnsProps): ColumnDef<Receipt
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <Link href={`/receipts/${receipt.id}`}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View & Print
+              {/* <DropdownMenuItem asChild>
+                <Link href={`/sales/${sale.id}/edit`}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit Sale
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

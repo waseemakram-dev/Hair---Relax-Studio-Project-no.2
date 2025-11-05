@@ -22,7 +22,7 @@ export interface Worker {
   archived?: boolean;
 }
 
-export interface Receipt {
+export interface Sale {
   id: string;
   customerName: string;
   workerId: string;

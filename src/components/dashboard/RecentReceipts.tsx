@@ -19,9 +19,9 @@ import {
 import { Badge } from "@/components/ui/badge"
 import type { Timestamp } from "firebase/firestore"
 
-export function RecentReceipts() {
-  const { receipts, workers } = useSalon()
-  const recentReceipts = [...receipts]
+export function RecentSales() {
+  const { sales, workers } = useSalon()
+  const recentSales = [...sales]
     .sort((a, b) => {
         const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : (a.createdAt as Timestamp).toMillis();
         const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : (b.createdAt as Timestamp).toMillis();
@@ -45,20 +45,20 @@ export function RecentReceipts() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentReceipts.length > 0 ? (
-              recentReceipts.map((receipt) => {
-                const worker = workers.find(w => w.id === receipt.workerId)
-                const createdAt = receipt.createdAt instanceof Date ? receipt.createdAt : (receipt.createdAt as Timestamp).toDate();
+            {recentSales.length > 0 ? (
+              recentSales.map((sale) => {
+                const worker = workers.find(w => w.id === sale.workerId)
+                const createdAt = sale.createdAt instanceof Date ? sale.createdAt : (sale.createdAt as Timestamp).toDate();
                 return (
-                  <TableRow key={receipt.id}>
+                  <TableRow key={sale.id}>
                     <TableCell>
-                      <div className="font-medium">{receipt.customerName}</div>
+                      <div className="font-medium">{sale.customerName}</div>
                       <div className="text-sm text-muted-foreground">{createdAt.toLocaleTimeString()}</div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">{worker?.name || 'N/A'}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">Rs {receipt.total.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">Rs {sale.total.toFixed(2)}</TableCell>
                   </TableRow>
                 )
               })

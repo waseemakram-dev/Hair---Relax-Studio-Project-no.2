@@ -5,7 +5,7 @@ import { StatCard } from "@/components/dashboard/StatCard"
 import { useSalon } from "@/context/SalonProvider"
 import { DollarSign, Package, Users, Loader2 } from "lucide-react"
 import { WorkerPerformanceChart } from "@/components/dashboard/WorkerPerformanceChart"
-import { RecentReceipts } from "@/components/dashboard/RecentReceipts"
+import { RecentSales } from "@/components/dashboard/RecentSales"
 
 export default function DashboardPage() {
   const { products, getTodaysSales, getTodaysCustomers, loading } = useSalon()
@@ -53,7 +53,7 @@ export default function DashboardPage() {
           <WorkerPerformanceChart />
         </div>
         <div className="lg:col-span-2">
-            <RecentReceipts />
+            <RecentSales />
         </div>
       </div>
     </>

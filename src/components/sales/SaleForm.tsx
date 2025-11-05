@@ -1,15 +1,13 @@
-
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { useForm, useWatch } from "react-hook-form"
+import React, { useState } from "react"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,10 +30,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Textarea } from "../ui/textarea"
-import { Sparkles, Loader2 } from "lucide-react"
-import type { Product, Service, Worker, Receipt } from "@/lib/types"
-import { PrintableReceipt } from "./PrintableReceipt"
+import { Loader2 } from "lucide-react"
+import type { Product, Service, Worker } from "@/lib/types"
 
 const formSchema = z.object({
   customerName: z.string().min(1, "Customer name is required."),
@@ -45,14 +41,14 @@ const formSchema = z.object({
   discount: z.coerce.number().min(0).max(100).default(0),
 })
 
-interface ReceiptFormProps {
+interface SaleFormProps {
   onSubmit: (values: z.infer<typeof formSchema>) => void
   services: Service[]
   products: Product[]
   workers: Worker[]
 }
 
-export function ReceiptForm({ onSubmit, services, products, workers }: ReceiptFormProps) {
+export function SaleForm({ onSubmit, services, products, workers }: SaleFormProps) {
     const [isServiceDialogOpen, setServiceDialogOpen] = React.useState(false)
     const [isProductDialogOpen, setProductDialogOpen] = React.useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,52 +62,6 @@ export function ReceiptForm({ onSubmit, services, products, workers }: ReceiptFo
             discount: 0,
         },
     })
-
-    const watchedValues = useWatch({ control: form.control });
-
-    useEffect(() => {
-        const selectedWorker = workers.find(w => w.id === watchedValues.workerId)
-        
-        const subtotal = (watchedValues.serviceIds || []).reduce((acc, id) => {
-            const service = services.find(s => s.id === id);
-            return acc + (service?.price || 0);
-          }, 0) + (watchedValues.productIds || []).reduce((acc, item) => {
-            const product = products.find(p => p.id === item.id);
-            return acc + (product?.price || 0) * item.quantity;
-          }, 0);
-        
-        const total = subtotal - (subtotal * ((watchedValues.discount || 0) / 100));
-
-        const previewData = {
-            customerName: watchedValues.customerName,
-            workerId: watchedValues.workerId,
-            serviceIds: watchedValues.serviceIds,
-            productIds: watchedValues.productIds,
-            discount: watchedValues.discount,
-            total,
-        }
-        
-        const previewElement = document.getElementById('receipt-preview');
-        if (previewElement) {
-            const previewInstance = React.createElement(PrintableReceipt, {
-                receipt: previewData,
-                services,
-                products,
-                worker: selectedWorker,
-            });
-
-            const root = (window as any)._receiptPreviewRoot;
-            if (root) {
-                root.render(previewInstance);
-            } else {
-                const { createRoot } = require('react-dom/client');
-                const newRoot = createRoot(previewElement);
-                newRoot.render(previewInstance);
-                (window as any)._receiptPreviewRoot = newRoot;
-            }
-        }
-    }, [watchedValues, services, products, workers]);
-
 
     const handleFinalSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsSubmitting(true);
@@ -288,19 +238,6 @@ export function ReceiptForm({ onSubmit, services, products, workers }: ReceiptFo
                         </FormItem>
                     )}
                 />
-            </CardContent>
-        </Card>
-
-
-        <Card>
-            <CardContent className="p-6 space-y-4">
-                <FormLabel>Promotional Copy (Optional)</FormLabel>
-                <FormDescription>AI-generated promo will appear here</FormDescription>
-                <Textarea placeholder="AI-generated promo will appear here" readOnly />
-                <Button type="button" variant="outline" className="w-full">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate with AI
-                </Button>
             </CardContent>
         </Card>
 

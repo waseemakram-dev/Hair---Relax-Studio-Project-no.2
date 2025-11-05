@@ -26,7 +26,7 @@ import { Logo } from "./Logo"
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/receipts", label: "Sales", icon: Receipt },
+  { href: "/sales", label: "Sales", icon: Receipt },
   { href: "/products", label: "Inventory", icon: Package },
   { href: "/services", label: "Services", icon: Scissors },
   { href: "/workers", label: "Workers", icon: Users },

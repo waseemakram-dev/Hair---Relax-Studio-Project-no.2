@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
-import type { Service, Product, Worker, Receipt } from '@/lib/types';
+import React, { createContext, useContext, ReactNode, useMemo, useEffect, useState } from 'react';
+import type { Service, Product, Worker, Sale } from '@/lib/types';
 import { useFirestore, useCollection } from '@/firebase';
 import {
   collection,
@@ -11,9 +11,6 @@ import {
   doc,
   writeBatch,
   serverTimestamp,
-  query,
-  where,
-  getDocs,
   Timestamp,
   increment
 } from 'firebase/firestore';
@@ -23,7 +20,7 @@ interface SalonContextType {
   services: Service[];
   products: Product[];
   workers: Worker[];
-  receipts: Receipt[];
+  sales: Sale[];
   loading: boolean;
   addService: (service: Omit<Service, 'id'>) => Promise<void>;
   updateService: (service: Service) => Promise<void>;
@@ -31,11 +28,11 @@ interface SalonContextType {
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  addWorker: (worker: Omit<Worker, 'id'>) => Promise<void>;
+  addWorker: (worker: Omit<Worker, 'id' | 'customers' | 'sales'>) => Promise<void>;
   updateWorker: (worker: Worker) => Promise<void>;
   archiveWorker: (id: string) => Promise<void>;
-  addReceipt: (receipt: Omit<Receipt, 'id' | 'createdAt' | 'total'>) => Promise<Receipt>;
-  getReceiptById: (id: string) => Receipt | undefined;
+  addSale: (sale: Omit<Sale, 'id' | 'createdAt' | 'total'>) => Promise<Sale>;
+  getSaleById: (id: string) => Sale | undefined;
   getTodaysSales: () => number;
   getTodaysCustomers: () => number;
 }
@@ -48,15 +45,39 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
 
   const servicesCollection = useMemo(() => user ? collection(firestore, 'services') : null, [firestore, user]);
   const productsCollection = useMemo(() => user ? collection(firestore, 'products') : null, [firestore, user]);
-  const workersCollection = useMemo(() => user ? collection(firestore, 'workers') : null, [firestore, user]);
-  const receiptsCollection = useMemo(() => user ? collection(firestore, 'receipts') : null, [firestore, user]);
+  const baseWorkersCollection = useMemo(() => user ? collection(firestore, 'workers') : null, [firestore, user]);
+  const salesCollection = useMemo(() => user ? collection(firestore, 'sales') : null, [firestore, user]);
 
   const { data: services = [], loading: servicesLoading } = useCollection<Service>(servicesCollection);
   const { data: products = [], loading: productsLoading } = useCollection<Product>(productsCollection);
-  const { data: workers = [], loading: workersLoading } = useCollection<Worker>(workersCollection);
-  const { data: receipts = [], loading: receiptsLoading } = useCollection<Receipt>(receiptsCollection);
+  const { data: baseWorkers = [], loading: workersLoading } = useCollection<Worker>(baseWorkersCollection);
+  const { data: sales = [], loading: salesLoading } = useCollection<Sale>(salesCollection);
+  
+  const [workers, setWorkers] = useState<Worker[]>([]);
 
-  const loading = userLoading || servicesLoading || productsLoading || workersLoading || receiptsLoading;
+  useEffect(() => {
+    if(!workersLoading && !salesLoading) {
+      const workerSales = new Map<string, {sales: number, customers: number}>();
+      
+      sales.forEach(sale => {
+        const stats = workerSales.get(sale.workerId) || { sales: 0, customers: 0 };
+        stats.sales += sale.total;
+        stats.customers += 1;
+        workerSales.set(sale.workerId, stats);
+      });
+
+      const updatedWorkers = baseWorkers.map(worker => ({
+        ...worker,
+        sales: workerSales.get(worker.id)?.sales || 0,
+        customers: workerSales.get(worker.id)?.customers || 0,
+      }));
+      
+      setWorkers(updatedWorkers);
+    }
+  }, [baseWorkers, sales, workersLoading, salesLoading])
+
+
+  const loading = userLoading || servicesLoading || productsLoading || workersLoading || salesLoading;
 
   const addService = async (service: Omit<Service, 'id'>) => {
     if (!servicesCollection) return;
@@ -90,60 +111,53 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     await deleteDoc(doc(productsCollection, id));
   };
 
-  const addWorker = async (worker: Omit<Worker, 'id'>) => {
-    if (!workersCollection) return;
-    await addDoc(workersCollection, worker);
+  const addWorker = async (worker: Omit<Worker, 'id' | 'customers' | 'sales'>) => {
+    if (!baseWorkersCollection) return;
+    await addDoc(baseWorkersCollection, { ...worker, sales: 0, customers: 0 });
   };
 
   const updateWorker = async (updatedWorker: Worker) => {
-    if (!workersCollection) return;
+    if (!baseWorkersCollection) return;
     const { id, ...data } = updatedWorker;
-    await updateDoc(doc(workersCollection, id), data);
+    await updateDoc(doc(baseWorkersCollection, id), data);
   };
 
   const archiveWorker = async (id: string) => {
-    if (!workersCollection) return;
-    await updateDoc(doc(workersCollection, id), { archived: true });
+    if (!baseWorkersCollection) return;
+    await updateDoc(doc(baseWorkersCollection, id), { archived: true });
   };
 
 
-  const addReceipt = async (receiptData: Omit<Receipt, 'id' | 'createdAt' | 'total'>): Promise<Receipt> => {
-    if (!receiptsCollection || !workersCollection || !productsCollection) {
+  const addSale = async (saleData: Omit<Sale, 'id' | 'createdAt' | 'total'>): Promise<Sale> => {
+    if (!salesCollection || !productsCollection) {
       throw new Error("Collections not ready");
     }
   
-    const servicesCost = receiptData.serviceIds.reduce((acc, id) => {
+    const servicesCost = saleData.serviceIds.reduce((acc, id) => {
       const service = services.find(s => s.id === id);
       return acc + (service?.price || 0);
     }, 0);
   
-    const productsCost = receiptData.productIds.reduce((acc, item) => {
+    const productsCost = saleData.productIds.reduce((acc, item) => {
       const product = products.find(p => p.id === item.id);
       return acc + (product?.price || 0) * item.quantity;
     }, 0);
   
     const subtotal = servicesCost + productsCost;
-    const total = subtotal - (subtotal * (receiptData.discount / 100));
+    const total = subtotal - (subtotal * (saleData.discount / 100));
   
-    const newReceiptData = {
-      ...receiptData,
+    const newSaleData = {
+      ...saleData,
       createdAt: serverTimestamp(),
       total,
     };
     
-    const receiptRef = await addDoc(receiptsCollection, newReceiptData);
+    const saleRef = await addDoc(salesCollection, newSaleData);
   
     const batch = writeBatch(firestore);
-  
-    // Update worker stats
-    const workerRef = doc(workersCollection, receiptData.workerId);
-    batch.update(workerRef, {
-      customers: increment(1),
-      sales: increment(total)
-    });
-  
+      
     // Update product stock
-    receiptData.productIds.forEach(item => {
+    saleData.productIds.forEach(item => {
       const productRef = doc(productsCollection, item.id);
       batch.update(productRef, {
         stock: increment(-item.quantity)
@@ -152,10 +166,10 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   
     await batch.commit();
 
-    return { ...receiptData, id: receiptRef.id, createdAt: new Date(), total };
+    return { ...saleData, id: saleRef.id, createdAt: new Date(), total };
   };
 
-  const getReceiptById = (id: string) => receipts.find(r => r.id === id);
+  const getSaleById = (id: string) => sales.find(r => r.id === id);
   
   const getTodaysSales = () => {
     const today = new Date();
@@ -163,7 +177,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    return receipts.filter(r => {
+    return sales.filter(r => {
         const createdAt = (r.createdAt as Timestamp).toDate();
         return createdAt >= today && createdAt < tomorrow;
     }).reduce((sum, r) => sum + r.total, 0);
@@ -175,18 +189,18 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    return receipts.filter(r => {
+    return sales.filter(r => {
         const createdAt = (r.createdAt as Timestamp).toDate();
         return createdAt >= today && createdAt < tomorrow;
     }).length;
   }
 
   const value = {
-    services, products, workers, receipts, loading,
+    services, products, workers, sales, loading,
     addService, updateService, deleteService,
     addProduct, updateProduct, deleteProduct,
     addWorker, updateWorker, archiveWorker,
-    addReceipt, getReceiptById,
+    addSale, getSaleById,
     getTodaysSales, getTodaysCustomers
   };
 

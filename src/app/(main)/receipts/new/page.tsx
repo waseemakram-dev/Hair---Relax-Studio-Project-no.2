@@ -1,7 +1,6 @@
 
 "use client"
 
-import { useRef } from "react"
 import { useSalon } from "@/context/SalonProvider"
 import { PageHeader } from "@/components/PageHeader"
 import { ReceiptForm } from "@/components/receipts/ReceiptForm"
@@ -14,7 +13,6 @@ export default function NewReceiptPage() {
   const { services, products, workers, addReceipt } = useSalon()
   const { toast } = useToast()
   const router = useRouter()
-  const printRef = useRef<HTMLDivElement>(null)
 
   const handleSubmit = async (values: any) => {
     try {
@@ -54,7 +52,7 @@ export default function NewReceiptPage() {
                  <Card className="sticky top-0">
                     <CardContent className="p-0">
                         <div id="receipt-preview">
-                            <PrintableReceipt ref={printRef} />
+                            <PrintableReceipt />
                         </div>
                     </CardContent>
                 </Card>

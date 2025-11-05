@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useSalon } from "@/context/SalonProvider"
 import { PageHeader } from "@/components/PageHeader"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import type { Timestamp } from "firebase/firestore"
 
 export default function SalesPage() {
   const { sales, workers, deleteSale } = useSalon()
@@ -43,7 +44,13 @@ export default function SalesPage() {
     }
   }
 
-  const columns = getColumns({ workers, onDelete: handleDeleteRequest })
+  const sortedSales = useMemo(() => [...sales].sort((a, b) => {
+    const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : (a.createdAt as Timestamp).toMillis();
+    const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : (b.createdAt as Timestamp).toMillis();
+    return dateA - dateB;
+  }), [sales]);
+
+  const columns = getColumns({ workers, onDelete: handleDeleteRequest, totalSales: sortedSales.length })
 
   return (
     <>
@@ -58,7 +65,7 @@ export default function SalesPage() {
           </Link>
         </Button>
       </PageHeader>
-      <DataTable columns={columns} data={sales} noResultsMessage="No sales yet." />
+      <DataTable columns={columns} data={sortedSales.reverse()} noResultsMessage="No sales yet." />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

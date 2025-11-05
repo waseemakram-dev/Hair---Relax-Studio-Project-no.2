@@ -18,14 +18,15 @@ import Link from "next/link"
 interface SalesColumnsProps {
   workers: Worker[]
   onDelete: (id: string) => void
+  totalSales: number
 }
 
-export const getColumns = ({ workers, onDelete }: SalesColumnsProps): ColumnDef<Sale>[] => [
+export const getColumns = ({ workers, onDelete, totalSales }: SalesColumnsProps): ColumnDef<Sale>[] => [
     {
-    accessorKey: "id",
+    id: "saleNumber",
     header: "Sale #",
     cell: ({ row }) => {
-        return <span>#{(row.getValue("id") as string).substring(0,6)}</span>
+        return <span>#{totalSales - row.index}</span>
     }
   },
   {
